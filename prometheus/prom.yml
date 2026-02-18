@@ -1,21 +1,28 @@
 global:
-  scrape_interval: 15s # Default scrape interval
+  scrape_interval: 15s
 
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  # - job_name: 'example_api'
-  #   scheme: http
-  #   static_configs:
-  #     - targets: ['example_api:9091']
-
-  #  ? TODO: add your services here
-  # - job_name: 'your-job-name'
-  #   scheme: https
-  #   static_configs:
-  #     - targets: ['URL_GOES_HERE']
-  #   basic_auth:
-  #     username: HTTP_AUTH_USERNAME_GOES_HERE
-  #     password: HTTP_AUTH_PASSWORD_GOES_HERE
+  # ── IAIARS API replicas (per-worker monitoring) ──────────────────────────
+  # Railway's internal DNS resolves <service>.railway.internal to one AAAA
+  # (IPv6) record per active replica. Prometheus scrapes each independently,
+  # giving per-replica metrics tagged with replica_id, region, and host.
+  #
+  # Set IAIARS_PRIVATE_DOMAIN in this service's Railway env vars to the
+  # private domain of the IAIARS service (e.g. "iaiars-api.railway.internal").
+  - job_name: 'iaiars-api-replicas'
+    dns_sd_configs:
+      - names:
+          - '${IAIARS_PRIVATE_DOMAIN}'
+        type: 'AAAA'
+        port: 8000
+    metrics_path: '/metrics'
+    scheme: 'http'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
