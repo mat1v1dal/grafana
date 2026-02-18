@@ -1,13 +1,12 @@
 ARG VERSION=v3.2.1
 
-FROM prom/prometheus:${VERSION}
-
-# Install gettext for envsubst (env-variable substitution in prom.yml)
-USER root
+# Stage 1: get envsubst from Alpine
+FROM alpine:3.19 AS tools
 RUN apk add --no-cache gettext
 
-# Copy config as template
+# Stage 2: Prometheus with envsubst binary copied in
+FROM prom/prometheus:${VERSION}
+COPY --from=tools /usr/bin/envsubst /usr/local/bin/envsubst
 COPY prom.yml /etc/prometheus/prom.yml.template
 
-# Entrypoint: substitute env vars then start Prometheus
 CMD ["sh", "-c", "envsubst < /etc/prometheus/prom.yml.template > /etc/prometheus/prom.yml && prometheus --config.file=/etc/prometheus/prom.yml --storage.tsdb.path=/prometheus"]
