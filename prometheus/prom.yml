@@ -7,22 +7,17 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   # ── IAIARS API replicas (per-worker monitoring) ──────────────────────────
-  # Railway's internal DNS resolves <service>.railway.internal to one AAAA
-  # (IPv6) record per active replica. Prometheus scrapes each independently,
-  # giving per-replica metrics tagged with replica_id, region, and host.
+  # Each replica registers its Railway IPv6 address in Redis on startup.
+  # The /health/metrics/targets endpoint reads Redis and returns all replicas
+  # in Prometheus HTTP SD format. Prometheus scrapes each IPv6 directly via
+  # socat (IPv6 → IPv4 bridge running in each replica container).
   #
-  # Set IAIARS_PRIVATE_DOMAIN in this service's Railway env vars to the
-  # private domain of the IAIARS service (e.g. "iaiars-api.railway.internal").
+  # Set IAIARS_PRIVATE_DOMAIN and IAIARS_PORT in this service's Railway env vars.
   - job_name: 'iaiars-api-replicas'
-    dns_sd_configs:
-      - names:
-          - '${IAIARS_PRIVATE_DOMAIN}'
-        type: 'AAAA'
-        port: ${IAIARS_PORT}
+    http_sd_configs:
+      - url: 'http://${IAIARS_PRIVATE_DOMAIN}:${IAIARS_PORT}/health/metrics/targets'
+        refresh_interval: 30s
     metrics_path: '/metrics'
     scheme: 'http'
     scrape_interval: 15s
     scrape_timeout: 10s
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: instance
