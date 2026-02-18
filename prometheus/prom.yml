@@ -18,7 +18,7 @@ scrape_configs:
       - names:
           - '${IAIARS_PRIVATE_DOMAIN}'
         type: 'AAAA'
-        port: 8000
+        port: ${IAIARS_PORT}
     metrics_path: '/metrics'
     scheme: 'http'
     scrape_interval: 15s
