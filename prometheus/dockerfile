@@ -1,12 +1,19 @@
 ARG VERSION=v3.2.1
 
-# Stage 1: get envsubst from Alpine
-FROM alpine:3.19 AS tools
+# Stage 1: get prometheus binary from official image
+FROM prom/prometheus:${VERSION} AS prom_official
+
+# Stage 2: Alpine as final base — has gettext (envsubst) natively
+# Prometheus is a statically compiled Go binary, runs fine on Alpine
+FROM alpine:3.19
 RUN apk add --no-cache gettext
 
-# Stage 2: Prometheus with envsubst binary copied in
-FROM prom/prometheus:${VERSION}
-COPY --from=tools /usr/bin/envsubst /usr/local/bin/envsubst
+COPY --from=prom_official /bin/prometheus /bin/prometheus
+COPY --from=prom_official /bin/promtool /bin/promtool
+RUN mkdir -p /prometheus /etc/prometheus
+
 COPY prom.yml /etc/prometheus/prom.yml.template
+
+EXPOSE 9090
 
 ENTRYPOINT ["sh", "-c", "envsubst < /etc/prometheus/prom.yml.template > /etc/prometheus/prom.yml && /bin/prometheus --config.file=/etc/prometheus/prom.yml --storage.tsdb.path=/prometheus"]
