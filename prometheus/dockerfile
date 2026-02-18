@@ -9,4 +9,4 @@ FROM prom/prometheus:${VERSION}
 COPY --from=tools /usr/bin/envsubst /usr/local/bin/envsubst
 COPY prom.yml /etc/prometheus/prom.yml.template
 
-CMD ["sh", "-c", "envsubst < /etc/prometheus/prom.yml.template > /etc/prometheus/prom.yml && prometheus --config.file=/etc/prometheus/prom.yml --storage.tsdb.path=/prometheus"]
+ENTRYPOINT ["sh", "-c", "envsubst < /etc/prometheus/prom.yml.template > /etc/prometheus/prom.yml && /bin/prometheus --config.file=/etc/prometheus/prom.yml --storage.tsdb.path=/prometheus"]
