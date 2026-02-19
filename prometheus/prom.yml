@@ -25,9 +25,9 @@ scrape_configs:
   # Set FBIA_MICRO_PRIVATE_DOMAIN and FBIA_MICRO_PORT in this service's env vars.
   - job_name: 'fbia-micro'                                                                     
     http_sd_configs:
-      - url: 'http://${FBIA_MICRO_PRIVATE_DOMAIN}:${FBIA_MICRO_PORT}/health/metrics/targets'
+      - url: 'https://${FBIA_MICRO_PRIVATE_DOMAIN}:${FBIA_MICRO_PORT}/health/metrics/targets'
         refresh_interval: 30s
     metrics_path: '/metrics'
-    scheme: 'http'
+    scheme: 'https'
     scrape_interval: 15s
     scrape_timeout: 10s
