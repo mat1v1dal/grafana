@@ -7,11 +7,11 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   # ── IAIARS API replicas (per-worker monitoring) ──────────────────────────
-  # Each replica registers its Railway IPv6 in Redis. This endpoint returns all replicas.
-  # Set IAIARS_PRIVATE_DOMAIN and IAIARS_PORT in this service's Railway env vars.
+  # Discovery via public URL, scraping via private IPv6 (requires socat in IAIARS).
+  # Set IAIARS_PUBLIC_DOMAIN in env vars (e.g., iaiars-01ai-agent-social-network-production.up.railway.app)
   - job_name: 'iaiars-api-replicas'
     http_sd_configs:
-      - url: 'http://${IAIARS_PRIVATE_DOMAIN}:${IAIARS_PORT}/health/metrics/targets'
+      - url: 'https://${IAIARS_PUBLIC_DOMAIN}/health/metrics/targets'
         refresh_interval: 30s
     metrics_path: '/metrics'
     scheme: 'http'
