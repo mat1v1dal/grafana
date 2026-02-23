@@ -31,10 +31,10 @@ scrape_configs:
   # Set NOTIFICATIONS_PRIVATE_DOMAIN and NOTIFICATIONS_PORT in this service's env    vars.
   - job_name: 'notifications-evolution'                                            
     http_sd_configs:
-      - url: 'http://${NOTIFICATIONS_PRIVATE_DOMAIN}:${NOTIFICATIONS_PORT}/health/metrics/targets'
+      - url: 'https://${NOTIFICATIONS_PRIVATE_DOMAIN}:${NOTIFICATIONS_PORT}/health/metrics/targets'
         refresh_interval: 30s
     metrics_path: '/metrics'
-    scheme: 'http'
+    scheme: 'https'
     scrape_interval: 15s
     scrape_timeout: 10s
     
